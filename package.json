@@ -1,15 +1,15 @@
 {
-    "name": "replacerules",
-    "displayName": "Replace Rules",
-    "description": "Create search/replace rules using Javascript regular expressions",
+    "name": "replacerulesui",
+    "displayName": "Visual Replace Rules",
+    "description": "Create search/replace rules using Javascript regular expressions and access them from the sidebar",
     "version": "0.4.2",
-    "publisher": "bhughes339",
+    "publisher": "andyfoster",
     "engines": {
         "vscode": "^1.70.0"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/bhughes339/vscode-replacerules.git"
+        "url": "https://github.com/andyfoster/vscode-replacerules-ui.git"
     },
     "categories": [
         "Other"
