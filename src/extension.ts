@@ -1,13 +1,58 @@
 import * as vscode from 'vscode';
 
 import ReplaceRulesEditProvider from './editProvider';
+import { ReplaceRulesProvider, RuleTreeItem, RulesetTreeItem } from './replaceRulesTreeProvider';
 
 export function activate(context: vscode.ExtensionContext) {
+    // Register existing commands
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('replacerules.runRule', runSingleRule));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('replacerules.runRuleset', runRuleset));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('replacerules.pasteAndReplace', pasteReplace));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('replacerules.pasteAndReplaceRuleset', pasteReplaceRuleset));
     context.subscriptions.push(vscode.commands.registerCommand('replacerules.stringifyRegex', stringifyRegex));
+
+    // Create tree data provider
+    const replaceRulesProvider = new ReplaceRulesProvider();
+
+    // Register the tree data provider
+    const treeView = vscode.window.createTreeView('replacerulesExplorer', {
+        treeDataProvider: replaceRulesProvider,
+        showCollapseAll: true
+    });
+    context.subscriptions.push(treeView);
+
+    // Register the refresh command
+    context.subscriptions.push(vscode.commands.registerCommand('replacerules.refreshRules', () => {
+        replaceRulesProvider.refresh();
+    }));
+
+    // Register commands for running rules from the tree view
+    context.subscriptions.push(vscode.commands.registerCommand('replacerules.runRuleFromExplorer', (item: RuleTreeItem) => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const editProvider = new ReplaceRulesEditProvider(editor);
+            editProvider.runSingleRule(item.ruleKey);
+        } else {
+            vscode.window.showErrorMessage('No active text editor found. Please open a file to apply the rule.');
+        }
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('replacerules.runRulesetFromExplorer', (item: RulesetTreeItem) => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const editProvider = new ReplaceRulesEditProvider(editor);
+            editProvider.runRuleset(item.rulesetKey);
+        } else {
+            vscode.window.showErrorMessage('No active text editor found. Please open a file to apply the ruleset.');
+        }
+    }));
+
+    // Listen to configuration changes
+    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+        if (e.affectsConfiguration('replacerules')) {
+            replaceRulesProvider.refresh();
+        }
+    }));
 }
 
 export function deactivate() {

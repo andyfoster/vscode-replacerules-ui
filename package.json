@@ -26,10 +26,28 @@
         "onCommand:replacerules.runRuleset",
         "onCommand:replacerules.pasteAndReplace",
         "onCommand:replacerules.pasteAndReplaceRuleset",
-        "onCommand:replacerules.stringifyRegex"
+        "onCommand:replacerules.stringifyRegex",
+        "onView:replacerulesExplorer"
     ],
     "main": "./out/extension.js",
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "replace-rules-explorer",
+                    "title": "Replace Rules",
+                    "icon": "images/icon.png"
+                }
+            ]
+        },
+        "views": {
+            "replace-rules-explorer": [
+                {
+                    "id": "replacerulesExplorer",
+                    "name": "Rules Explorer"
+                }
+            ]
+        },
         "commands": [
             {
                 "command": "replacerules.runRule",
@@ -55,8 +73,47 @@
                 "command": "replacerules.stringifyRegex",
                 "title": "Stringify regular expression",
                 "category": "Replace Rules"
+            },
+            {
+                "command": "replacerules.refreshRules",
+                "title": "Refresh Rules",
+                "category": "Replace Rules",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "replacerules.runRuleFromExplorer",
+                "title": "Run Rule",
+                "category": "Replace Rules",
+                "icon": "$(play)"
+            },
+            {
+                "command": "replacerules.runRulesetFromExplorer",
+                "title": "Run Ruleset",
+                "category": "Replace Rules",
+                "icon": "$(play)"
             }
         ],
+        "menus": {
+            "view/title": [
+                {
+                    "command": "replacerules.refreshRules",
+                    "when": "view == replacerulesExplorer",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "replacerules.runRuleFromExplorer",
+                    "when": "view == replacerulesExplorer && viewItem == rule",
+                    "group": "inline"
+                },
+                {
+                    "command": "replacerules.runRulesetFromExplorer",
+                    "when": "view == replacerulesExplorer && viewItem == ruleset",
+                    "group": "inline"
+                }
+            ]
+        },
         "keybindings": [
             {
                 "command": "replacerules.runRule",
