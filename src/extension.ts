@@ -11,8 +11,10 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('replacerules.pasteAndReplaceRuleset', pasteReplaceRuleset));
     context.subscriptions.push(vscode.commands.registerCommand('replacerules.stringifyRegex', stringifyRegex));
 
-    // Create tree data provider
-    const replaceRulesProvider = new ReplaceRulesProvider();
+    // Create tree data provider and store it for global access
+    const replaceRulesProvider = new ReplaceRulesProvider(context);
+    // Store the provider in a global variable for access from command handlers
+    globalReplaceRulesProvider = replaceRulesProvider;
 
     // Register the tree data provider
     const treeView = vscode.window.createTreeView('replacerulesExplorer', {
@@ -32,6 +34,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (editor) {
             const editProvider = new ReplaceRulesEditProvider(editor);
             editProvider.runSingleRule(item.ruleKey);
+
+            // Update usage history
+            replaceRulesProvider.updateRuleUsage(item.ruleKey);
         } else {
             vscode.window.showErrorMessage('No active text editor found. Please open a file to apply the rule.');
         }
@@ -42,6 +47,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (editor) {
             const editProvider = new ReplaceRulesEditProvider(editor);
             editProvider.runRuleset(item.rulesetKey);
+
+            // Update usage history
+            replaceRulesProvider.updateRuleUsage(item.rulesetKey);
         } else {
             vscode.window.showErrorMessage('No active text editor found. Please open a file to apply the ruleset.');
         }
@@ -56,14 +64,23 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-
+    // Clean up global reference
+    globalReplaceRulesProvider = null;
 }
+
+// Global reference to the tree provider
+let globalReplaceRulesProvider: ReplaceRulesProvider | null = null;
 
 function runSingleRule(textEditor: vscode.TextEditor, _edit: vscode.TextEditorEdit, args?: any) {
     let editP = new ReplaceRulesEditProvider(textEditor);
     if (args) {
         let ruleName = args['ruleName'];
         editP.runSingleRule(ruleName);
+
+        // Update rule usage tracking
+        if (globalReplaceRulesProvider) {
+            globalReplaceRulesProvider.updateRuleUsage(ruleName);
+        }
     } else {
         editP.pickRuleAndRun();
     }
@@ -75,6 +92,11 @@ function runRuleset(textEditor: vscode.TextEditor, _edit: vscode.TextEditorEdit,
     if (args) {
         let rulesetName = args['rulesetName'];
         editP.runRuleset(rulesetName);
+
+        // Update rule usage tracking
+        if (globalReplaceRulesProvider) {
+            globalReplaceRulesProvider.updateRuleUsage(rulesetName);
+        }
     } else {
         editP.pickRulesetAndRun();
     }
@@ -86,6 +108,11 @@ function pasteReplace(textEditor: vscode.TextEditor, _edit: vscode.TextEditorEdi
     if (args) {
         let ruleName = args['ruleName'];
         editP.pasteReplace(ruleName);
+
+        // Update rule usage tracking
+        if (globalReplaceRulesProvider) {
+            globalReplaceRulesProvider.updateRuleUsage(ruleName);
+        }
     } else {
         editP.pickRuleAndPaste();
     }
@@ -97,6 +124,11 @@ function pasteReplaceRuleset(textEditor: vscode.TextEditor, _edit: vscode.TextEd
     if (args) {
         let rulesetName = args['rulesetName'];
         editP.pasteReplaceRuleset(rulesetName);
+
+        // Update rule usage tracking
+        if (globalReplaceRulesProvider) {
+            globalReplaceRulesProvider.updateRuleUsage(rulesetName);
+        }
     } else {
         editP.pickRulesetAndPaste();
     }
