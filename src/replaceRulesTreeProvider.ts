@@ -1,5 +1,11 @@
 import * as vscode from 'vscode';
 
+// Sort mode enum
+export enum SortMode {
+    LastUsed = 'lastUsed',
+    Alphabetical = 'alphabetical'
+}
+
 // Interface for rule usage history
 export interface RuleUsage {
     timestamp: number;
@@ -86,12 +92,36 @@ export class ReplaceRulesProvider implements vscode.TreeDataProvider<vscode.Tree
     // Store rule usage history
     private ruleUsageHistory: Map<string, RuleUsage> = new Map();
 
+    // Current sort mode
+    private sortMode: SortMode = SortMode.LastUsed;
+
     constructor(private context: vscode.ExtensionContext) {
         // Load rule usage history from global state
         const savedHistory = this.context.globalState.get<{ [key: string]: RuleUsage }>('ruleUsageHistory');
         if (savedHistory) {
             this.ruleUsageHistory = new Map(Object.entries(savedHistory));
         }
+        // Load saved sort mode
+        const savedSortMode = this.context.globalState.get<string>('sortMode');
+        if (savedSortMode && Object.values(SortMode).includes(savedSortMode as SortMode)) {
+            this.sortMode = savedSortMode as SortMode;
+        }
+    }
+
+    // Change the sort mode
+    setSortMode(mode: SortMode): void {
+        this.sortMode = mode;
+
+        // Save to global state
+        this.context.globalState.update('sortMode', mode);
+
+        // Refresh the view
+        this.refresh();
+    }
+
+    // Get current sort mode
+    getSortMode(): SortMode {
+        return this.sortMode;
     }
 
     // Update usage for a rule
@@ -181,18 +211,24 @@ export class ReplaceRulesProvider implements vscode.TreeDataProvider<vscode.Tree
             }
         }
 
-        // Sort by last used (most recent first)
-        items.sort((a, b) => {
-            // If neither has been used, sort alphabetically
-            if (!a.lastUsed && !b.lastUsed) {
-                return a.label.localeCompare(b.label);
-            }
-            // If only one has been used, it should come first
-            if (!a.lastUsed) return 1;
-            if (!b.lastUsed) return -1;
-            // Otherwise sort by timestamp (descending)
-            return b.lastUsed - a.lastUsed;
-        });
+        // Sort based on the current sort mode
+        if (this.sortMode === SortMode.LastUsed) {
+            // Sort by last used (most recent first)
+            items.sort((a, b) => {
+                // If neither has been used, sort alphabetically
+                if (!a.lastUsed && !b.lastUsed) {
+                    return a.label.localeCompare(b.label);
+                }
+                // If only one has been used, it should come first
+                if (!a.lastUsed) return 1;
+                if (!b.lastUsed) return -1;
+                // Otherwise sort by timestamp (descending)
+                return b.lastUsed - a.lastUsed;
+            });
+        } else {
+            // Sort alphabetically
+            items.sort((a, b) => a.label.localeCompare(b.label));
+        }
 
         return items;
     }
@@ -217,18 +253,24 @@ export class ReplaceRulesProvider implements vscode.TreeDataProvider<vscode.Tree
             }
         }
 
-        // Sort rulesets by last used (most recent first)
-        items.sort((a, b) => {
-            // If neither has been used, sort alphabetically
-            if (!a.lastUsed && !b.lastUsed) {
-                return a.label.localeCompare(b.label);
-            }
-            // If only one has been used, it should come first
-            if (!a.lastUsed) return 1;
-            if (!b.lastUsed) return -1;
-            // Otherwise sort by timestamp (descending)
-            return b.lastUsed - a.lastUsed;
-        });
+        // Sort based on the current sort mode
+        if (this.sortMode === SortMode.LastUsed) {
+            // Sort by last used (most recent first)
+            items.sort((a, b) => {
+                // If neither has been used, sort alphabetically
+                if (!a.lastUsed && !b.lastUsed) {
+                    return a.label.localeCompare(b.label);
+                }
+                // If only one has been used, it should come first
+                if (!a.lastUsed) return 1;
+                if (!b.lastUsed) return -1;
+                // Otherwise sort by timestamp (descending)
+                return b.lastUsed - a.lastUsed;
+            });
+        } else {
+            // Sort alphabetically
+            items.sort((a, b) => a.label.localeCompare(b.label));
+        }
 
         return items;
     }

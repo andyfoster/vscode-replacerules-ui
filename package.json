@@ -81,6 +81,24 @@
                 "icon": "$(refresh)"
             },
             {
+                "command": "replacerules.sortByName",
+                "title": "Sort by Name",
+                "category": "Replace Rules",
+                "icon": "$(sort-precedence)"
+            },
+            {
+                "command": "replacerules.sortByLastUsed",
+                "title": "Sort by Last Used",
+                "category": "Replace Rules",
+                "icon": "$(history)"
+            },
+            {
+                "command": "replacerules.createRule",
+                "title": "Create New Rule",
+                "category": "Replace Rules",
+                "icon": "$(add)"
+            },
+            {
                 "command": "replacerules.runRuleFromExplorer",
                 "title": "Run Rule",
                 "category": "Replace Rules",
@@ -99,18 +117,64 @@
                     "command": "replacerules.refreshRules",
                     "when": "view == replacerulesExplorer",
                     "group": "navigation"
+                },
+                {
+                    "command": "replacerules.sortByName",
+                    "when": "view == replacerulesExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "replacerules.sortByLastUsed",
+                    "when": "view == replacerulesExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "replacerules.createRule",
+                    "when": "view == replacerulesExplorer",
+                    "group": "navigation"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "replacerules.runRuleFromExplorer",
                     "when": "view == replacerulesExplorer && viewItem == rule",
-                    "group": "inline"
+                    "group": "inline@1"
                 },
                 {
                     "command": "replacerules.runRulesetFromExplorer",
                     "when": "view == replacerulesExplorer && viewItem == ruleset",
-                    "group": "inline"
+                    "group": "inline@1"
+                },
+                {
+                    "command": "replacerules.editRule",
+                    "title": "Edit Rule",
+                    "category": "Replace Rules",
+                    "icon": "$(edit)",
+                    "when": "view == replacerulesExplorer && viewItem == rule"
+                },
+                {
+                    "command": "replacerules.deleteRule",
+                    "title": "Delete Rule",
+                    "category": "Replace Rules",
+                    "icon": "$(trash)",
+                    "when": "view == replacerulesExplorer && viewItem == rule"
+                },
+                {
+                    "command": "replacerules.addRuleToRuleset",
+                    "title": "Add to Ruleset",
+                    "category": "Replace Rules",
+                    "when": "view == replacerulesExplorer && viewItem == rule",
+                    "group": "context"
+                },
+                {
+                    "command": "replacerules.editRule",
+                    "when": "view == replacerulesExplorer && viewItem == rule",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "replacerules.deleteRule",
+                    "when": "view == replacerulesExplorer && viewItem == rule",
+                    "group": "inline@3"
                 }
             ]
         },
